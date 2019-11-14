@@ -1,5 +1,3 @@
-'use strict';
-
 const Hapi = require('@hapi/hapi');
 
 const init = async () => {
@@ -16,7 +14,7 @@ const init = async () => {
       return 'Hello World!';
     }
   });
-  
+
   await server.start();
   console.log('Server running on %s', server.info.uri);
 };
