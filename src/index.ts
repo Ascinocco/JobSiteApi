@@ -1,5 +1,14 @@
 const Hapi = require('@hapi/hapi');
 
+class Server {
+  private readonly Hapi;
+  private readonly console;
+  constructor(Hapi, console) {
+    this.Hapi = Hapi;
+    this.console = console;
+  }
+}
+
 const init = async () => {
 
   const server = Hapi.server({
