@@ -19,7 +19,7 @@ interface DatabaseConfig {
 
 interface HttpServerConfig {
   port: string;
-  hostname: string;
+  // hostname: string;
 }
 
 interface AppServerConfig {
@@ -35,40 +35,39 @@ export interface AppServer {
 }
 
 const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
-  secretKey: config.secretKey || 'devSecretSoSecretUdontKnowIt10394!',
-  routes: config.routes || [],
+  secretKey: config?.secretKey || 'devSecretSoSecretUdontKnowIt10394!',
+  routes: config?.routes || [],
   httpServerConfig: {
-    port: config.httpServerConfig.port || '3000',
-    hostname: config.httpServerConfig.hostname || 'localhost',
+    port: config?.httpServerConfig?.port || '3000',
+    // hostname: config?.httpServerConfig?.hostname || 'localhost',
   },
   databaseConfig: {
-    client: config.databaseConfig.client || 'postgres',
+    client: config?.databaseConfig?.client || 'postgres',
     connection: {
-      database: config.databaseConfig.connection.database || 'jobsiteapidb',
-      user: config.databaseConfig.connection.user || 'anthony',
-      password: config.databaseConfig.connection.password || 'password',
+      database: config?.databaseConfig?.connection?.database || 'jobsiteapidb',
+      user: config?.databaseConfig?.connection?.user || 'anthony',
+      password: config?.databaseConfig?.connection?.password || 'password',
     },
     pool: {
-      min: config.databaseConfig.pool.min || 2,
-      max: config.databaseConfig.pool.max || 10,
+      min: config?.databaseConfig?.pool?.min || 2,
+      max: config?.databaseConfig?.pool?.max || 10,
     }
   }
 });
 
 export default async function createAppServer(appServerConfig?: AppServerConfig) {
   const config = buildServerConfig(appServerConfig);
-  console.log('SERVER -- CONFIG -- :', config);
 
   // Knex db + config
   const knex = Knex(config.databaseConfig);
   knex.migrate.latest();
   Model.bind(knex);
 
-  const hapiServer = Hapi.server(appServerConfig.httpServerConfig);
+  const hapiServer = Hapi.server(config.httpServerConfig);
   await hapiServer.register(jwt2);
 
   hapiServer.auth.strategy('jwt', 'jwt', {
-    key: appServerConfig.secretKey,
+    key: config.secretKey,
     validate: async function(decoded, request, h) {
       console.log('validate running....');
       console.log('decoded', decoded);
