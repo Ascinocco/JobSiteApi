@@ -1,8 +1,7 @@
 import Hapi from '@hapi/hapi';
 import * as HapiTypes from 'hapi';
-import Knex from 'knex';
 import jwt2 from 'hapi-auth-jwt2'
-import { Model } from 'objection';
+// import { Model } from 'objection';
 
 interface DatabaseConfig {
   client: string;
@@ -25,13 +24,12 @@ interface HttpServerConfig {
 interface AppServerConfig {
   routes: object[];
   httpServerConfig: HttpServerConfig;
-  databaseConfig: DatabaseConfig;
+  // databaseConfig: DatabaseConfig;
   secretKey: string;
 }
 
 export interface AppServer {
   hapiServer: HapiTypes.Server;
-  knex: Knex;
 }
 
 const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
@@ -41,27 +39,27 @@ const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
     port: config?.httpServerConfig?.port || '3000',
     // hostname: config?.httpServerConfig?.hostname || 'localhost',
   },
-  databaseConfig: {
-    client: config?.databaseConfig?.client || 'postgres',
-    connection: {
-      database: config?.databaseConfig?.connection?.database || 'jobsiteapidb',
-      user: config?.databaseConfig?.connection?.user || 'anthony',
-      password: config?.databaseConfig?.connection?.password || 'password',
-    },
-    pool: {
-      min: config?.databaseConfig?.pool?.min || 2,
-      max: config?.databaseConfig?.pool?.max || 10,
-    }
-  }
+  // databaseConfig: {
+  //   client: config?.databaseConfig?.client || 'postgres',
+  //   connection: {
+  //     database: config?.databaseConfig?.connection?.database || 'jobsiteapidb',
+  //     user: config?.databaseConfig?.connection?.user || 'anthony',
+  //     password: config?.databaseConfig?.connection?.password || 'password',
+  //   },
+  //   pool: {
+  //     min: config?.databaseConfig?.pool?.min || 2,
+  //     max: config?.databaseConfig?.pool?.max || 10,
+  //   }
+  // }
 });
 
 export default async function createAppServer(appServerConfig?: AppServerConfig) {
   const config = buildServerConfig(appServerConfig);
 
   // Knex db + config
-  const knex = Knex(config.databaseConfig);
-  knex.migrate.latest();
-  Model.bind(knex);
+  // const knex = Knex(config.databaseConfig);
+  // knex.migrate.latest();
+  // Model.bind(knex);
 
   const hapiServer = Hapi.server(config.httpServerConfig);
   await hapiServer.register(jwt2);
@@ -90,6 +88,6 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
 
   return {
     hapiServer,
-    knex,
+    // knex,
   };
 };

@@ -1,9 +1,9 @@
-import Knex from 'knex';
+// import Knex from 'knex';
 
 export default class Handler {
-  protected knex: Knex;
+  // protected knex: Knex;
 
-  constructor(knex: Knex) {
-    this.knex = knex;
-  }
+  // constructor(knex: Knex) {
+  //   this.knex = knex;
+  // }
 }

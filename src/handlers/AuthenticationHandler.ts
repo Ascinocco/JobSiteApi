@@ -50,11 +50,11 @@ export default class AuthenticationHandler extends Handler {
     try {
       const payload: RegistrationPayload = <RegistrationPayload> request.payload;
       await validateRegistration(payload);
-      const user = await transaction(User.knex(), trx => {
-        return (
-          User.query(trx).insertGraph(payload)
-        );
-      });
+      // const user = await transaction(User.knex(), trx => {
+      //   return (
+      //     User.query(trx).insertGraph(payload)
+      //   );
+      // });
       // console.log('user', user.$toJson());
       return 'temp';
     }

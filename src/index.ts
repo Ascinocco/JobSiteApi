@@ -5,13 +5,12 @@ const run = async () => {
   const appServer: AppServer = await createAppServer();
 
   // routes
-  const authHandler = new AuthenticationHandler(appServer.knex);
+  const authHandler = new AuthenticationHandler();
   appServer.hapiServer.route(authHandler.routes());
 
   await appServer.hapiServer.start();
   console.log('Api running on port: ', appServer.hapiServer.info.port);
 };
-
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
