@@ -1,37 +1,21 @@
-const Hapi = require('@hapi/hapi');
+import createAppServer, { AppServer } from "./core/createAppServer";
+import AuthenticationHandler from "./handlers/AuthenticationHandler";
 
-class Server {
-  private readonly Hapi;
-  private readonly console;
-  constructor(Hapi, console) {
-    this.Hapi = Hapi;
-    this.console = console;
-  }
-}
+const run = async () => {
+  const appServer: AppServer = await createAppServer();
 
-const init = async () => {
+  // routes
+  const authHandler = new AuthenticationHandler(appServer.knex);
+  appServer.hapiServer.route(authHandler.routes());
 
-  const server = Hapi.server({
-    port: 3000,
-    host: 'localhost'
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => {
-      return 'Hello World!';
-    }
-  });
-
-  await server.start();
-  console.log('Server running on %s', server.info.uri);
+  await appServer.hapiServer.start();
+  console.log('Api running on port: ', appServer.hapiServer.info.port);
 };
 
-process.on('unhandledRejection', (err) => {
 
+process.on('unhandledRejection', (err) => {
   console.log(err);
   process.exit(1);
 });
 
-init();
+run();

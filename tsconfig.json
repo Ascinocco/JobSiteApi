@@ -1,4 +1,7 @@
 {
+  "types": [
+    "hapi"
+  ],
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
