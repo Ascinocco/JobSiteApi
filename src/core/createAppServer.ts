@@ -1,8 +1,13 @@
 import Hapi from '@hapi/hapi';
 import * as HapiTypes from 'hapi';
-import jwt2 from 'hapi-auth-jwt2'
+import jwt2 from 'hapi-auth-jwt2';
+import jwt from 'jsonwebtoken';
 import Sequelize, {Sequelize as SequelizeType} from 'sequelize';
 import createToken from './createToken';
+
+interface SequelizeResult {
+  rowCount: number;
+}
 
 interface DatabaseConfig {
   database: string;
@@ -87,6 +92,17 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
     validate: async function(decoded, request, h) {
       if (decoded.exp < new Date().getTime() / 1000) {
         // expired
+        return { isValid: false };
+      }
+
+      const [ resultsArray ] = await sequelize.query('SELECT 1 FROM users WHERE id = :id AND blacklist = :blacklist', {
+        replacements: {
+          id: decoded.id,
+          blacklist: true,
+        }
+      });
+
+      if (resultsArray.length) {
         return { isValid: false };
       }
 

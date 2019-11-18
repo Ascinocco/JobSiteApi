@@ -1,5 +1,6 @@
 CREATE TABLE users(
     "id"              SERIAL PRIMARY KEY,
+    "blacklist"       BOOLEAN NOT NULL DEFAULT FALSE,
     "firstName"       VARCHAR (80) NOT NULL,
     "lastName"        VARCHAR (80) NOT NULL,
     "email"           VARCHAR UNIQUE NOT NULL,
