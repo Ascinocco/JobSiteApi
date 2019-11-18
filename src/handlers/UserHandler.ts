@@ -5,6 +5,18 @@ import User, {UserIFace} from '../models/User';
 import Handler from "./Handler";
 import Response from "./Response";
 
+interface AccountDetails {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  isConsumer?: boolean;
+  isWorker?: boolean;
+  age?: number;
+  country?: string;
+  city?: string;
+  zipPostalCode?: string;
+}
+
 export default class UserHandler extends Handler {
   public routes() {
     return [
@@ -49,7 +61,37 @@ export default class UserHandler extends Handler {
   private changePassword = async () => {
   //  @TODO: change password logic
   };
-  private updateProfileDetails = async () => {};
+
+  private updateProfileDetails = async (request: Request, h: ResponseObjectHeaderOptions) => {
+    try {
+      // @ts-ignore
+      const id: number = request.auth.credentials.id;
+      const payload: AccountDetails = <AccountDetails> request.payload;
+      console.log('payload', payload);
+      const query = `UPDATE users SET ${Object.keys(payload).map(k => `"${k}" = :${k}`)} WHERE id = :id RETURNING *;`;
+
+      const [[ user ]] = await this.sequelize.query(query, {
+        replacements: {
+          ...payload,
+          id
+        },
+      });
+
+      return Response({
+        body: {
+          user: new User(<UserIFace> user, this.sequelize),
+        }
+      });
+    }
+    catch (err) {
+      console.log('err', err);
+      return Response({
+        err,
+        body: {}
+      });
+    }
+  };
+
   private changeProfileImage = async () => {};
   private deleteAccount = async () => {};
 }
