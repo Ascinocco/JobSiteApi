@@ -5,7 +5,10 @@ const run = async () => {
   const appServer: AppServer = await createAppServer();
 
   // routes
-  const authHandler = new AuthenticationHandler(appServer.sequelize);
+  const authHandler = new AuthenticationHandler(
+    appServer.sequelize,
+    appServer.createToken,
+  );
   appServer.hapiServer.route(authHandler.routes());
 
   await appServer.hapiServer.start();

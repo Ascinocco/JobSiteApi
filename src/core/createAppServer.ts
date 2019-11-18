@@ -2,6 +2,7 @@ import Hapi from '@hapi/hapi';
 import * as HapiTypes from 'hapi';
 import jwt2 from 'hapi-auth-jwt2'
 import Sequelize, {Sequelize as SequelizeType} from 'sequelize';
+import createToken from './createToken';
 
 interface DatabaseConfig {
   database: string;
@@ -28,9 +29,15 @@ interface AppServerConfig {
   secretKey: string;
 }
 
+interface UserTokenRequiredData {
+  id: number;
+  email: string;
+}
+
 export interface AppServer {
   hapiServer: HapiTypes.Server;
   sequelize: SequelizeType,
+  createToken(id: number, email: string): string;
 }
 
 const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
@@ -58,7 +65,7 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
   const config = buildServerConfig(appServerConfig);
 
   // @ts-ignore
-  const sequelize: Sequelize = new Sequelize(
+  const sequelize: SequelizeType = new Sequelize(
     config.databaseConfig.database,
     config.databaseConfig.username,
     config.databaseConfig.password,
@@ -78,21 +85,12 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
   hapiServer.auth.strategy('jwt', 'jwt', {
     key: config.secretKey,
     validate: async function(decoded, request, h) {
-      console.log('validate running....');
-      console.log('decoded', decoded);
-      console.log('decoded.id', decoded.id);
-      console.log('request', request);
-      console.log('h', h);
-      console.log('....................');
-      // @TODO: token decoded id
-      // make db call.
-      // check if creds are valid
-      // return appropriately
-      if (true) {
-        return { isValid: true };
+      if (decoded.exp < new Date().getTime() / 1000) {
+        // expired
+        return { isValid: false };
       }
 
-      return { isValid: false };
+      return { isValid: true };
     }
   });
   hapiServer.auth.default('jwt');
@@ -100,5 +98,6 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
   return {
     hapiServer,
     sequelize,
+    createToken: createToken(config.secretKey),
   };
 };

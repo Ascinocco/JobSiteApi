@@ -1,7 +1,8 @@
 import EmailValidator from 'email-deep-validator';
 import {Request, ResponseObjectHeaderOptions} from 'hapi';
 import Bcrypt from 'bcrypt';
-// import {transaction} from "objection";
+import {Sequelize} from "sequelize";
+
 
 import User, {UserIFace} from '../models/User';
 import Handler from "./Handler";
@@ -47,6 +48,13 @@ async function validateRegistration(data: RegistrationPayload): Promise<void> {
 
 // @TODO: implement token refresh handler
 export default class AuthenticationHandler extends Handler {
+  private createToken;
+
+  constructor(sequelize: Sequelize, createToken) {
+    super(sequelize);
+    this.createToken = createToken;
+  }
+
   private register = async (request: Request, h: ResponseObjectHeaderOptions) => {
     try {
       const payload: RegistrationPayload = <RegistrationPayload> request.payload;
@@ -77,7 +85,6 @@ export default class AuthenticationHandler extends Handler {
           zipPostalCode:  payload.zipPostalCode || null,
         }
       };
-
       await this.sequelize.query(query, options);
 
       const newUser = await this.sequelize.query(
@@ -87,13 +94,12 @@ export default class AuthenticationHandler extends Handler {
         }
       });
 
-      // if (!newUser || !newUser[0] || ![0][0]) {
-      //   throw new Error('New user not found');
-      // }
+      const user = new User(<UserIFace> newUser[0][0], this.sequelize);
 
       return Response({
         body: {
-          user: new User(<UserIFace> newUser[0][0], this.sequelize),
+          user,
+          token: this.createToken(user.id, user.email),
         }
       });
     }
@@ -104,6 +110,10 @@ export default class AuthenticationHandler extends Handler {
         body: {}
       });
     }
+  };
+
+  private me = (request: Request, h: ResponseObjectHeaderOptions) => {
+    return 'me!';
   };
 
   private login = (request: Request, h: ResponseObjectHeaderOptions) => {
@@ -120,6 +130,7 @@ export default class AuthenticationHandler extends Handler {
 
   public routes() {
     return [
+      { method: 'GET', path: '/me', handler: this.me, config: { auth: 'jwt' } },
       { method: 'POST', path: '/auth/register', handler: this.register, config: { auth: false } },
       { method: 'POST', path: '/auth/login', handler: this.login, config: { auth: false } },
       { method: 'POST', path: '/auth/logout', handler: this.logout, config: { auth: 'jwt' } }

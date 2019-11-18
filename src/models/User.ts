@@ -17,10 +17,10 @@ export interface UserIFace {
 }
 
 export default class User {
-  protected readonly id: number;
+  public readonly id: number;
   protected firstName: string;
   protected lastName: string;
-  protected email: string;
+  public email: string;
   protected password: string;
   protected isConsumer: boolean;
   protected isWorker: boolean;
