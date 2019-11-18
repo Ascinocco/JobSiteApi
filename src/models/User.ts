@@ -14,6 +14,10 @@ export interface UserIFace {
   street?: string;
   city?: string;
   zipPostalCode?: string;
+
+  notifyMeIfJobsInRange?: boolean;
+  maxDistance?: number;
+  distanceUnit?: string;
 }
 
 export default class User {
@@ -30,6 +34,9 @@ export default class User {
   protected city: string;
   protected zipPostalCode: string;
   private readonly sequelize: Sequelize;
+  protected notifyMeIfJobsInRange: boolean;
+  protected maxDistance: number;
+  protected distanceUnit: string;
 
   constructor(userData: UserIFace, sequelize: Sequelize) {
     this.id               = userData.id;
@@ -45,6 +52,9 @@ export default class User {
     this.city             = userData.city;
     this.zipPostalCode    = userData.zipPostalCode;
     this.sequelize        = sequelize;
+    this.notifyMeIfJobsInRange = userData.notifyMeIfJobsInRange;
+    this.maxDistance           = userData.maxDistance;
+    this.distanceUnit          = userData.distanceUnit;
   }
 
   public toJSON = () => {
@@ -59,6 +69,9 @@ export default class User {
       country:    this.country,
       street:     this.street,
       city:       this.city,
+      notifyMeIfJobsInRange: this.notifyMeIfJobsInRange,
+      maxDistance:           this.maxDistance,
+      distanceUnit:          this.distanceUnit,
     }
   }
 }

@@ -1,19 +1,22 @@
 CREATE TABLE users(
-    "id"              SERIAL PRIMARY KEY,
-    "blacklist"       BOOLEAN NOT NULL DEFAULT FALSE,
-    "firstName"       VARCHAR (80) NOT NULL,
-    "lastName"        VARCHAR (80) NOT NULL,
-    "email"           VARCHAR UNIQUE NOT NULL,
-    "isConsumer"      BOOLEAN NOT NULL DEFAULT TRUE,
-    "isWorker"        BOOLEAN NOT NULL DEFAULT TRUE,
-    "password"        VARCHAR NOT NULL,
-    "age"             INTEGER,
-    "country"         VARCHAR,
-    "street"          VARCHAR,
-    "city"            VARCHAR,
-    "zipPostalCode"   VARCHAR,
-    "createdOn"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "id"                    SERIAL PRIMARY KEY,
+    "blacklist"             BOOLEAN NOT NULL DEFAULT FALSE,
+    "notifyMeIfJobsInRange" BOOLEAN NOT NULL DEFAULT FALSE,
+    "maxDistance"           INTEGER NOT NULL DEFAULT 50,
+    "distanceUnit"          VARCHAR (25) NOT NULL DEFAULT 'KILOMETRE',
+    "firstName"             VARCHAR (80) NOT NULL,
+    "lastName"              VARCHAR (80) NOT NULL,
+    "email"                 VARCHAR UNIQUE NOT NULL,
+    "isConsumer"            BOOLEAN NOT NULL DEFAULT TRUE,
+    "isWorker"              BOOLEAN NOT NULL DEFAULT TRUE,
+    "password"              VARCHAR NOT NULL,
+    "age"                   INTEGER,
+    "country"               VARCHAR,
+    "street"                VARCHAR,
+    "city"                  VARCHAR,
+    "zipPostalCode"         VARCHAR,
+    "createdOn"             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt"             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE blacklisted_tokens(
