@@ -73,5 +73,5 @@ export default class User {
       maxDistance:           this.maxDistance,
       distanceUnit:          this.distanceUnit,
     }
-  }
+  };
 }

@@ -31,6 +31,7 @@ CREATE TABLE jobs(
     "id"              SERIAL PRIMARY KEY,
     "consumerId"      BIGINT REFERENCES users(id),
     "workerId"        BIGINT,
+    "allowWorkerToAddActionItems" BOOLEAN NOT NULL DEFAULT FALSE,
     "title"           VARCHAR NOT NULL,
     "description"     VARCHAR NOT NULL,
     "dueDate"         TIMESTAMP,
@@ -38,4 +39,17 @@ CREATE TABLE jobs(
     "status"          VARCHAR,
     "createdOn"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE action_items(
+    "id"             SERIAL PRIMARY KEY,
+    "order"          INTEGER NOT NULL,
+    "jobId"          BIGINT REFERENCES jobs(id),
+    "authorId"       BIGINT REFERENCES users(id),
+    "checkedOffById" BIGINT REFERENCES users(id),
+    "completed"      BOOLEAN NOT NULL DEFAULT FALSE,
+    "text"           VARCHAR NOT NULL,
+    "status"         VARCHAR,
+    "createdOn"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
