@@ -1,5 +1,5 @@
 import EmailValidator from 'email-deep-validator';
-import {Request, ResponseObjectHeaderOptions} from 'hapi';
+import {Request, RequestAuth, ResponseObjectHeaderOptions} from 'hapi';
 import Bcrypt from 'bcrypt';
 import {Sequelize} from "sequelize";
 
@@ -22,6 +22,17 @@ interface RegistrationPayload {
   street?: string;
   city?: string;
   zipPostalCode?: string;
+}
+
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+interface LogoutAuth {
+  isAuthenticated: boolean;
+  credentials: { id: number; };
+  token: string;
 }
 
 async function validateRegistration(data: RegistrationPayload): Promise<void> {
@@ -112,25 +123,69 @@ export default class AuthenticationHandler extends Handler {
     }
   };
 
-  private me = (request: Request, h: ResponseObjectHeaderOptions) => {
-    return 'me!';
+  private login = async (request: Request, h: ResponseObjectHeaderOptions) => {
+    try {
+      const payload: LoginPayload = <LoginPayload> request.payload;
+      const [[ userData ]] = await this.sequelize.query('SELECT * FROM users WHERE email = :email', {
+        replacements: {
+          email: payload.email
+        }
+      });
+
+      const user = new User(<UserIFace> userData, this.sequelize);
+      const pwMatch = await Bcrypt.compare(payload.password, user.password);
+
+      if (!pwMatch) {
+        throw new Error('Passwords did not match');
+      }
+
+      return Response({
+        body: {
+          user,
+          token: this.createToken(user.id, user.email),
+        }
+      });
+    }
+    catch (err) {
+      console.log('err', err);
+      return Response({
+        err,
+        body: {}
+      });
+    }
   };
 
-  private login = (request: Request, h: ResponseObjectHeaderOptions) => {
-    console.log('request', request.payload);
-    console.log('h', h);
-    return 'login reached';
-  };
+  private logout = async (request: Request, h: ResponseObjectHeaderOptions) => {
+    try {
+      const auth: RequestAuth = request.auth;
+      const [ _, rowCount ] = await this.sequelize.query('INSERT INTO blacklisted_tokens ("token", "userId") VALUES (:token, :userId)', {
+        replacements: {
+          // @ts-ignore
+          token: auth.token,
+          // @ts-ignore
+          userId: auth.credentials.id,
+        }
+      });
 
-  private logout = (request: Request, h: ResponseObjectHeaderOptions) => {
-    console.log('request', request.payload);
-    console.log('h', h);
-    return 'logout reached';
+      if (!rowCount) {
+        throw new Error('Failed to logout.');
+      }
+
+      return Response({
+        body: {}
+      });
+    }
+    catch (err) {
+      console.log('err', err);
+      return Response({
+        err,
+        body: {}
+      });
+    }
   };
 
   public routes() {
     return [
-      { method: 'GET', path: '/me', handler: this.me, config: { auth: 'jwt' } },
       { method: 'POST', path: '/auth/register', handler: this.register, config: { auth: false } },
       { method: 'POST', path: '/auth/login', handler: this.login, config: { auth: false } },
       { method: 'POST', path: '/auth/logout', handler: this.logout, config: { auth: 'jwt' } }

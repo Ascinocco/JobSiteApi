@@ -16,6 +16,14 @@ CREATE TABLE users(
     "updatedAt"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE blacklisted_tokens(
+    "id"              SERIAL PRIMARY KEY,
+    "userId"          BIGINT REFERENCES users(id),
+    "token"           VARCHAR NOT NULL,
+    "createdOn"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE jobs(
     "id"              SERIAL PRIMARY KEY,
     "consumerId"      BIGINT REFERENCES users(id),
@@ -24,5 +32,7 @@ CREATE TABLE jobs(
     "description"     VARCHAR NOT NULL,
     "dueDate"         TIMESTAMP,
     "bid"             FLOAT,
-    "status"          VARCHAR
+    "status"          VARCHAR,
+    "createdOn"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt"       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -90,19 +90,30 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
   hapiServer.auth.strategy('jwt', 'jwt', {
     key: config.secretKey,
     validate: async function(decoded, request, h) {
+      console.log('req.auth', request.auth);
       if (decoded.exp < new Date().getTime() / 1000) {
         // expired
         return { isValid: false };
       }
 
-      const [ resultsArray ] = await sequelize.query('SELECT 1 FROM users WHERE id = :id AND blacklist = :blacklist', {
+      const [ usersResultsArray ] = await sequelize.query('SELECT 1 FROM users WHERE id = :id AND blacklist = :blacklist', {
         replacements: {
           id: decoded.id,
           blacklist: true,
         }
       });
 
-      if (resultsArray.length) {
+      if (usersResultsArray.length) {
+        return { isValid: false };
+      }
+
+      const [ tokensResultsArray ] = await sequelize.query('SELECT 1 FROM blacklisted_tokens where token = :token', {
+        replacements: {
+          token: request.auth.token,
+        },
+      });
+
+      if (tokensResultsArray.length) {
         return { isValid: false };
       }
 

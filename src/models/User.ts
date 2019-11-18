@@ -21,7 +21,7 @@ export default class User {
   protected firstName: string;
   protected lastName: string;
   public email: string;
-  protected password: string;
+  public readonly password: string;
   protected isConsumer: boolean;
   protected isWorker: boolean;
   protected age: number | string;
