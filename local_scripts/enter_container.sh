@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker exec -it JobSiteApiDb bash
+docker exec -it JobSiteApiDb1 bash

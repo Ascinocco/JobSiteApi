@@ -14,10 +14,14 @@
     "bcrypt": "^3.0.6",
     "email-deep-validator": "^3.3.0",
     "hapi-auth-jwt2": "^8.8.0",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.21.2"
   },
   "devDependencies": {
     "@types/hapi": "^18.0.3",
+    "@types/pg": "^7.11.2",
+    "@types/sequelize": "^4.28.6",
     "nodemon": "^1.19.4",
     "ts-node": "^8.5.0",
     "tslint": "^5.20.1",

@@ -1,30 +1,36 @@
-import { Model } from "objection";
+import {Sequelize} from 'sequelize';
 
-export default class Job extends Model {
-  static get tableName() {
-    return 'jobs';
-  }
+interface JobIFace {
+  readonly id: number;
+  readonly consumerId: number;
+  workerId?: number;
+  title: string;
+  description: string;
+  dueDate?: number;
+  bid?: number;
+  status?: string;
+}
 
-  static get jsonSchema() {
-    return {
-      type: 'object',
-      required: [
-        'title',
-        'description',
-        'consumerId',
-        'dueDate',
-        'bid',
-      ],
-      properties: {
-        id: {type: 'integer'},
-        consumerId: {type: 'integer'},
-        workerId: {type: ['integer', 'null']},
-        title: {type: 'string', minLength: 10, maxLength: 255},
-        description: {type: 'string'},
-        dueDate: {type: 'float'},
-        bid: {type: 'float'},
-        status: {type: 'string'},
-      }
-    };
+export default class Job {
+  protected readonly id: number;
+  protected readonly consumerId: number;
+  protected workerId: number;
+  protected title: string;
+  protected description: string;
+  protected dueDate: number;
+  protected bid: number;
+  protected status: string;
+  private readonly sequelize: Sequelize;
+
+  constructor(jobData: JobIFace, sequelize: Sequelize) {
+    this.id           = jobData.id;
+    this.consumerId   = jobData.consumerId;
+    this.workerId     = jobData.workerId;
+    this.title        = jobData.title;
+    this.description  = jobData.description;
+    this.dueDate      = jobData.dueDate;
+    this.bid          = jobData.bid;
+    this.status       = jobData.status;
+    this.sequelize    = sequelize;
   }
 }

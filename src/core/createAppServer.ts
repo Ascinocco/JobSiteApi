@@ -1,35 +1,36 @@
 import Hapi from '@hapi/hapi';
 import * as HapiTypes from 'hapi';
 import jwt2 from 'hapi-auth-jwt2'
-// import { Model } from 'objection';
+import Sequelize, {Sequelize as SequelizeType} from 'sequelize';
 
 interface DatabaseConfig {
-  client: string;
-  connection: {
-    database: string;
-    user: string;
-    password: string;
-  };
+  database: string;
+  username: string;
+  password: string;
+  host: string;
+  dialect: string;
   pool: {
-    min: number;
     max: number;
-  };
+    min: number;
+    acquire: number;
+    idle: number;
+  }
 }
 
 interface HttpServerConfig {
   port: string;
-  // hostname: string;
 }
 
 interface AppServerConfig {
   routes: object[];
   httpServerConfig: HttpServerConfig;
-  // databaseConfig: DatabaseConfig;
+  databaseConfig: DatabaseConfig;
   secretKey: string;
 }
 
 export interface AppServer {
   hapiServer: HapiTypes.Server;
+  sequelize: SequelizeType,
 }
 
 const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
@@ -37,29 +38,39 @@ const buildServerConfig = (config: AppServerConfig): AppServerConfig => ({
   routes: config?.routes || [],
   httpServerConfig: {
     port: config?.httpServerConfig?.port || '3000',
-    // hostname: config?.httpServerConfig?.hostname || 'localhost',
   },
-  // databaseConfig: {
-  //   client: config?.databaseConfig?.client || 'postgres',
-  //   connection: {
-  //     database: config?.databaseConfig?.connection?.database || 'jobsiteapidb',
-  //     user: config?.databaseConfig?.connection?.user || 'anthony',
-  //     password: config?.databaseConfig?.connection?.password || 'password',
-  //   },
-  //   pool: {
-  //     min: config?.databaseConfig?.pool?.min || 2,
-  //     max: config?.databaseConfig?.pool?.max || 10,
-  //   }
-  // }
+  databaseConfig: {
+    database: config?.databaseConfig?.database || 'jobsiteapidb',
+    username: config?.databaseConfig?.username || 'anthony',
+    password: config?.databaseConfig?.password || 'password',
+    host: config?.databaseConfig?.host || 'localhost',
+    dialect: config?.databaseConfig?.dialect || 'postgres',
+    pool: {
+      max: config?.databaseConfig?.pool?.max || 5,
+      min: config?.databaseConfig?.pool?.min || 0,
+      acquire: config?.databaseConfig?.pool?.acquire || 30000,
+      idle: config?.databaseConfig?.pool?.idle || 10000,
+    },
+  }
 });
 
 export default async function createAppServer(appServerConfig?: AppServerConfig) {
   const config = buildServerConfig(appServerConfig);
 
-  // Knex db + config
-  // const knex = Knex(config.databaseConfig);
-  // knex.migrate.latest();
-  // Model.bind(knex);
+  // @ts-ignore
+  const sequelize: Sequelize = new Sequelize(
+    config.databaseConfig.database,
+    config.databaseConfig.username,
+    config.databaseConfig.password,
+    {
+      host: config.databaseConfig.host,
+      dialect: config.databaseConfig.dialect,
+      pool: config.databaseConfig.pool,
+      define: {
+        timestamps: true,
+      }
+    }
+  );
 
   const hapiServer = Hapi.server(config.httpServerConfig);
   await hapiServer.register(jwt2);
@@ -88,6 +99,6 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
 
   return {
     hapiServer,
-    // knex,
+    sequelize,
   };
 };

@@ -1,8 +1,9 @@
 import EmailValidator from 'email-deep-validator';
 import {Request, ResponseObjectHeaderOptions} from 'hapi';
-import {transaction} from "objection";
+import Bcrypt from 'bcrypt';
+// import {transaction} from "objection";
 
-import User from '../models/User';
+import User, {UserIFace} from '../models/User';
 import Handler from "./Handler";
 import Response from "./Response";
 
@@ -50,13 +51,51 @@ export default class AuthenticationHandler extends Handler {
     try {
       const payload: RegistrationPayload = <RegistrationPayload> request.payload;
       await validateRegistration(payload);
-      // const user = await transaction(User.knex(), trx => {
-      //   return (
-      //     User.query(trx).insertGraph(payload)
-      //   );
-      // });
-      // console.log('user', user.$toJson());
-      return 'temp';
+
+      const salt = await Bcrypt.genSalt(10);
+      const hash = await Bcrypt.hash(payload.password, salt);
+
+      const query = `
+            INSERT INTO users
+                    ("id", "firstName", "lastName", "email", "password", "isConsumer",
+                     "isWorker", "age", "country", "street", "city", "zipPostalCode")
+                     VALUES (DEFAULT, :firstName, :lastName, :email, :password, DEFAULT,
+                             DEFAULT, :age, :country, :street, :city, :zipPostalCode);`;
+
+      const options = {
+        replacements: {
+          firstName:      payload.firstName     || null,
+          lastName:       payload.lastName      || null,
+          email:          payload.email         || null,
+          password:       hash                  || null,
+          isConsumer:     payload.isConsumer    || null,
+          isWorker:       payload.isWorker      || null,
+          age:            payload.age           || null,
+          country:        payload.country       || null,    // needs to be required for launch
+          street:         payload.street        || null,
+          city:           payload.city          || null,
+          zipPostalCode:  payload.zipPostalCode || null,
+        }
+      };
+
+      await this.sequelize.query(query, options);
+
+      const newUser = await this.sequelize.query(
+        'SELECT * FROM users WHERE email = :email', {
+        replacements: {
+          email: payload.email,
+        }
+      });
+
+      // if (!newUser || !newUser[0] || ![0][0]) {
+      //   throw new Error('New user not found');
+      // }
+
+      return Response({
+        body: {
+          user: new User(<UserIFace> newUser[0][0], this.sequelize),
+        }
+      });
     }
     catch (err) {
       console.log('err', err);

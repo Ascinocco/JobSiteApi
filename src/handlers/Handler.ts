@@ -1,9 +1,9 @@
-// import Knex from 'knex';
+import {Sequelize} from "sequelize";
 
 export default class Handler {
-  // protected knex: Knex;
+  protected sequelize: Sequelize;
 
-  // constructor(knex: Knex) {
-  //   this.knex = knex;
-  // }
+  constructor(sequelize: Sequelize) {
+    this.sequelize = sequelize;
+  }
 }
