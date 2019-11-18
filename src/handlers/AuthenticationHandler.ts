@@ -57,13 +57,20 @@ async function validateRegistration(data: RegistrationPayload): Promise<void> {
   }
 }
 
-// @TODO: implement token refresh handler
 export default class AuthenticationHandler extends Handler {
   private createToken;
 
   constructor(sequelize: Sequelize, createToken) {
     super(sequelize);
     this.createToken = createToken;
+  }
+
+  public routes() {
+    return [
+      { method: 'POST', path: '/auth/register', handler: this.register, config: { auth: false } },
+      { method: 'POST', path: '/auth/login', handler: this.login, config: { auth: false } },
+      { method: 'POST', path: '/auth/logout', handler: this.logout, config: { auth: 'jwt' } }
+    ];
   }
 
   private register = async (request: Request, h: ResponseObjectHeaderOptions) => {
@@ -183,12 +190,4 @@ export default class AuthenticationHandler extends Handler {
       });
     }
   };
-
-  public routes() {
-    return [
-      { method: 'POST', path: '/auth/register', handler: this.register, config: { auth: false } },
-      { method: 'POST', path: '/auth/login', handler: this.login, config: { auth: false } },
-      { method: 'POST', path: '/auth/logout', handler: this.logout, config: { auth: 'jwt' } }
-    ];
-  }
 }

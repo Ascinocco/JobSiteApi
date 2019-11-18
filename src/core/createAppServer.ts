@@ -96,6 +96,7 @@ export default async function createAppServer(appServerConfig?: AppServerConfig)
         return { isValid: false };
       }
 
+      // @TODO: Optimizatation, wrap these checks into sql function
       const [ usersResultsArray ] = await sequelize.query('SELECT 1 FROM users WHERE id = :id AND blacklist = :blacklist', {
         replacements: {
           id: decoded.id,
