@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/hapi": "^18.4.0",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "email-deep-validator": "^3.3.0",
     "hapi-auth-jwt2": "^8.8.0",
     "jsonwebtoken": "^8.5.1",
