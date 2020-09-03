@@ -10,7 +10,7 @@
   "author": "Anthony Scinocco",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hapi": "^18.4.0",
+    "@hapi/hapi": "^19.1.1",
     "bcrypt": "^3.0.6",
     "email-deep-validator": "^3.3.0",
     "hapi-auth-jwt2": "^8.8.0",
